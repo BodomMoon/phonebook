@@ -58,10 +58,20 @@ int main(int argc, char *argv[])
 
     /* build the entry */
     entry *pHead, *e;
+#if OPT ==1
+    pHead = NULL;
+    int counter = 0;
+    do
+    {
+        hashTable[(counter++)] =(entry*) malloc(sizeof(entry));
+
+    }while(counter < MAX_TABLE_SIZE);
+#else
     pHead = (entry *) malloc(sizeof(entry));
     printf("size of entry : %lu bytes\n", sizeof(entry));
     e = pHead;
     e->pNext = NULL;
+#endif
 
 #if defined(__GNUC__)
     __builtin___clear_cache((char *) pHead, (char *) pHead + sizeof(entry));
@@ -71,9 +81,6 @@ int main(int argc, char *argv[])
         line[strlen(line) -1] = '\0'; //change while loop to strlen
 #if OPT == 1 //compilering OPT version
         unsigned int hashValue = BKDRhash(line);
-        if(hashTable[hashValue] == NULL){
-            hashTable[hashValue] =(entry*) malloc(sizeof(entry)); 
-        }
         append(line , hashTable[hashValue]);  
 #else       //compilering orgin version  
         e = append(line, e);
@@ -117,7 +124,7 @@ int main(int argc, char *argv[])
     printf("execution time of findName() : %lf sec\n", cpu_time2);
 
 #if OPT == 1 //compilering OPT version
-    int counter = 0;
+    counter = 0;
     do
     {
         free(hashTable[counter] -> pNext);
