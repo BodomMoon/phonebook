@@ -8,7 +8,7 @@
 #define MAX_TABLE_SIZE 4096
 
 #if OPT == 1
-#define OUT_FILE "opt.txt"
+#define OUT_FILE "opt.txt" 
 
 entry *hashTable[MAX_TABLE_SIZE] = {NULL};
 #else
