@@ -8,7 +8,7 @@
 #define MAX_TABLE_SIZE 4096
 
 #if OPT == 1
-#define OUT_FILE "opt.txt" 
+#define OUT_FILE "opt.txt"
 
 entry *hashTable[MAX_TABLE_SIZE] = {NULL};
 #else
@@ -32,17 +32,18 @@ static double diff_in_second(struct timespec t1, struct timespec t2)
 
 unsigned int BKDRhash(char *cPtr)
 {
-    int hash = 0;
-    int seed = 31; 
-    do
+    unsigned int hash = 0;
+    unsigned int seed =31;
+    do {
         hash = hash * seed + (*cPtr++);
-    while(*cPtr != '\0');
+    } while (*cPtr | 0);
     return (hash & (MAX_TABLE_SIZE -1)); //we learn from class
+
+    /* *cPtr | 0 = *cPtr != '\0' gcc will compile then to the same thing */
 }
 
 int main(int argc, char *argv[])
 {
-
     FILE *fp;
     //int i = 0;
     char line[MAX_LAST_NAME_SIZE];
@@ -61,11 +62,9 @@ int main(int argc, char *argv[])
 #if OPT ==1
     pHead = NULL;
     int counter = 0;
-    do
-    {
+    do {
         hashTable[(counter++)] =(entry*) malloc(sizeof(entry));
-
-    }while(counter < MAX_TABLE_SIZE);
+    } while (counter < MAX_TABLE_SIZE);
 #else
     pHead = (entry *) malloc(sizeof(entry));
     printf("size of entry : %lu bytes\n", sizeof(entry));
@@ -81,7 +80,7 @@ int main(int argc, char *argv[])
         line[strlen(line) -1] = '\0'; //change while loop to strlen
 #if OPT == 1 //compilering OPT version
         unsigned int hashValue = BKDRhash(line);
-        append(line , hashTable[hashValue]);  
+        append(line, hashTable[hashValue]);
 #else       //compilering orgin version  
         e = append(line, e);
 #endif
@@ -125,12 +124,11 @@ int main(int argc, char *argv[])
 
 #if OPT == 1 //compilering OPT version
     counter = 0;
-    do
-    {
+    do {
         free(hashTable[counter] -> pNext);
         free(hashTable[(counter++)] );
 
-    }while(counter < MAX_TABLE_SIZE);
+    } while (counter < MAX_TABLE_SIZE);
 #else
     if (pHead != NULL) {
         free(pHead->pNext);
