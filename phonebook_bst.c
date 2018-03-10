@@ -8,7 +8,8 @@
 /* Hash+BST version */
 entry *findName(char lastName[], entry *pHead)
 {
-    /*if(pHead != NULL){
+    /*   this is my old dirty code
+    if(pHead != NULL){
     } else
         return NULL;
     do
@@ -24,14 +25,13 @@ entry *findName(char lastName[], entry *pHead)
         }
     } while (pHead != NULL);
     return NULL;*/
-    int result;
-
-    while (pHead != NULL && (result = strcasecmp(lastName, pHead->lastName)) != 0) {
+    int result = strcasecmp(lastName, pHead->lastName);
+    do {
         if (result < 0)
             pHead = pHead -> pLeft;
         else
             pHead = pHead -> pRight;
-    }
+    } while (pHead != NULL && (result = strcasecmp(lastName, pHead->lastName)) != 0);
 
     if (pHead !=NULL)
         return (pHead);
@@ -67,7 +67,7 @@ entry *append(char lastName[], entry *e)
     pre->pRight = NULL;
     return pre;
 
-    /*
+    /*   this is my old dirty code
     while(1)
     {
         if(strcasecmp(e->lastName, lastName) < 0 ){
