@@ -2,8 +2,9 @@ CC ?= gcc
 CFLAGS_common ?= -Wall -std=gnu99
 CFLAGS_orig = -O0
 CFLAGS_opt  = -O0
+CFLAGS_bst  = -O0
 
-EXEC = phonebook_orig phonebook_opt phonebook_bst
+EXEC = phonebook_orig phonebook_opt phonebook_bst phonebook_ent
 
 GIT_HOOKS := .git/hooks/applied
 .PHONY: all
@@ -24,9 +25,13 @@ phonebook_opt: $(SRCS_common) phonebook_opt.c phonebook_opt.h
 		-DIMPL="\"$@.h\"" -o $@ \
 		$(SRCS_common) $@.c
 phonebook_bst: $(SRCS_common) phonebook_bst.c phonebook_bst.h
-	$(CC) $(CFLAGS_common) $(CFLAGS_opt) \
+	$(CC) $(CFLAGS_common) $(CFLAGS_bst) \
 		-DIMPL="\"$@.h\"" -o $@ \
 		$(SRCS_common) $@.c
+phonebook_ent: $(SRCS_common) phonebook_opt.c phonebook_opt.h
+	$(CC) $(CFLAGS_common) $(CFLAGS_bst) \
+		-DIMPL="\"phonebook_opt.h\"" -o $@ \
+		-D ENT=1 $(SRCS_common) phonebook_opt.c
 
 
 run: $(EXEC)
