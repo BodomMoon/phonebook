@@ -9,7 +9,6 @@
 
 #if OPT == 1
 #define OUT_FILE "opt.txt"
-
 entry *hashTable[MAX_TABLE_SIZE] = {NULL};
 #else
 #define OUT_FILE "orig.txt"
@@ -52,19 +51,29 @@ int main(int argc, char *argv[])
 
     /* check file opening */
     fp = fopen(DICT_FILE, "r");
-    if (fp == NULL) {
+    if (fp != NULL) {
+        /*
+        fopen successful, continue execution.
+        */
+    } else {
         printf("cannot open the file\n");
         return -1;
     }
-
     /* build the entry */
     entry *pHead, *e;
 #if OPT ==1
     pHead = NULL;
     int counter = 0;
+    printf("size of entry : %lu bytes\n", sizeof(entry));
     do {
-        hashTable[(counter++)] =(entry*) malloc(sizeof(entry));
+#if BST ==1
+        hashTable[counter] = (entry*) malloc(sizeof(entry));
+        *hashTable[(counter++)] -> lastName = 0;
+#else
+        hashTable[(counter++)] = (entry*) malloc(sizeof(entry));
+#endif
     } while (counter < MAX_TABLE_SIZE);
+
 #else
     pHead = (entry *) malloc(sizeof(entry));
     printf("size of entry : %lu bytes\n", sizeof(entry));
@@ -122,7 +131,15 @@ int main(int argc, char *argv[])
     printf("execution time of append() : %lf sec\n", cpu_time1);
     printf("execution time of findName() : %lf sec\n", cpu_time2);
 
-#if OPT == 1 //compilering OPT version
+#if BST == 1 && OPT== 1//compilering OPT version
+    counter = 0;
+    do {
+        free(hashTable[counter] -> pLeft);
+        free(hashTable[counter] -> pRight);
+        free(hashTable[(counter++)] );
+
+    } while (counter < MAX_TABLE_SIZE);
+#elif OPT == 1 && BST != 1
     counter = 0;
     do {
         free(hashTable[counter] -> pNext);
