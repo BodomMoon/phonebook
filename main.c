@@ -6,15 +6,21 @@
 
 #include IMPL
 #define MAX_TABLE_SIZE 4096
+#define DICT_FILE "./dictionary/words.txt"
 
-#if OPT == 1
+#if BST == 1
+#define OUT_FILE "bst.txt"
+entry *hashTable[MAX_TABLE_SIZE] = {NULL};
+entry *tableHead[MAX_TABLE_SIZE] = {NULL};
+#elif OPT == 1
 #define OUT_FILE "opt.txt"
 entry *hashTable[MAX_TABLE_SIZE] = {NULL};
+entry *tableHead[MAX_TABLE_SIZE] = {NULL};
 #else
 #define OUT_FILE "orig.txt"
 #endif
 
-#define DICT_FILE "./dictionary/words.txt"
+
 
 static double diff_in_second(struct timespec t1, struct timespec t2)
 {
@@ -68,9 +74,11 @@ int main(int argc, char *argv[])
     do {
 #if BST ==1
         hashTable[counter] = (entry*) malloc(sizeof(entry));
+        tableHead[counter ] = hashTable[counter ];
         *hashTable[(counter++)] -> lastName = 0;
 #else
         hashTable[(counter++)] = (entry*) malloc(sizeof(entry));
+        tableHead[counter -1 ] = hashTable[counter - 1];
 #endif
     } while (counter < MAX_TABLE_SIZE);
 
@@ -85,32 +93,51 @@ int main(int argc, char *argv[])
     __builtin___clear_cache((char *) pHead, (char *) pHead + sizeof(entry));
 #endif
     clock_gettime(CLOCK_REALTIME, &start);
-    while (fgets(line, sizeof(line), fp)) {
+#if ENT==1 //editable version
+    puts("enter the words you want to append");
+    fgets(line, sizeof(line), stdin);
+#else
+    fgets(line, sizeof(line), fp);
+#endif
+    do {
         line[strlen(line) -1] = '\0'; //change while loop to strlen
 #if OPT == 1 //compilering OPT version
         unsigned int hashValue = BKDRhash(line);
-        append(line, hashTable[hashValue]);
+#if BST != 1
+        hashTable[hashValue] = append(line, hashTable[hashValue]);
+#else
+        append(line, tableHead[hashValue]);
+#endif
 #else       //compilering orgin version  
         e = append(line, e);
 #endif
-    }
+    } while (fgets(line, sizeof(line), fp));
+    /* close file as soon as possible */
+    fclose(fp);
     clock_gettime(CLOCK_REALTIME, &end);
     cpu_time1 = diff_in_second(start, end);
 
-    /* close file as soon as possible */
-    fclose(fp);
     /* the givn last name to find */
-    char input[MAX_LAST_NAME_SIZE] = "zyxel";
 
-#if OPT == 1 //compilering OPT version
-    e = hashTable[BKDRhash(input)];
+
+#if OPT == 1 && ENT!=1//compilering OPT version
+    char input[MAX_LAST_NAME_SIZE] = "zyxel";
+    e = tableHead[BKDRhash(input)];
+#elif ENT == 1 //editable version
+    puts("enter the words you want to search");
+    fflush(stdin);
+    char input[MAX_LAST_NAME_SIZE];
+    fgets(input, MAX_LAST_NAME_SIZE, stdin);
+    input[strlen(input)-1] = '\0';
+    e = tableHead[BKDRhash(input)];
 #else
+    char input[MAX_LAST_NAME_SIZE] = "zyxel";
     e = pHead;
 #endif
 
     assert(findName(input, e) &&
            "Did you implement findName() in " IMPL "?");
-    assert(0 == strcmp(findName(input, e)->lastName, "zyxel"));
+    assert(0 == strcmp(findName(input, e)->lastName, input));
 
 
 
@@ -130,20 +157,21 @@ int main(int argc, char *argv[])
 
     printf("execution time of append() : %lf sec\n", cpu_time1);
     printf("execution time of findName() : %lf sec\n", cpu_time2);
+    printf("execution clock of findName() : %ld clock\n",end.tv_nsec - start.tv_nsec );
 
 #if BST == 1 && OPT== 1//compilering OPT version
     counter = 0;
     do {
-        free(hashTable[counter] -> pLeft);
-        free(hashTable[counter] -> pRight);
-        free(hashTable[(counter++)] );
+        free(tableHead[counter] -> pLeft);
+        free(tableHead[counter] -> pRight);
+        free(tableHead[(counter++)] );
 
     } while (counter < MAX_TABLE_SIZE);
 #elif OPT == 1 && BST != 1
     counter = 0;
     do {
-        free(hashTable[counter] -> pNext);
-        free(hashTable[(counter++)] );
+        free(tableHead[counter] -> pNext);
+        free(tableHead[(counter++)] );
 
     } while (counter < MAX_TABLE_SIZE);
 #else
@@ -155,5 +183,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
 
