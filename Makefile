@@ -26,8 +26,8 @@ phonebook_opt: $(SRCS_common) phonebook_opt.c phonebook_opt.h
 		$(SRCS_common) $@.c
 phonebook_bst: $(SRCS_common) phonebook_bst.c phonebook_bst.h
 	$(CC) $(CFLAGS_common) $(CFLAGS_bst) \
-		-DIMPL="\"$@.h\"" -o $@ \
-		$(SRCS_common) $@.c
+		-g -DIMPL="\"$@.h\"" -o $@ -g \
+		$(SRCS_common) -g $@.c
 phonebook_ent: $(SRCS_common) phonebook_opt.c phonebook_opt.h
 	$(CC) $(CFLAGS_common) $(CFLAGS_bst) \
 		-DIMPL="\"phonebook_opt.h\"" -o $@ \
@@ -52,6 +52,16 @@ cache-test: $(EXEC)
 	perf stat --repeat 100 \
 		-e cache-misses,cache-references,instructions,cycles \
 		./phonebook_opt
+	perf stat --repeat 10 \
+		-e cache-misses,cache-references,instructions,cycles \
+		./phonebook_bst
+			
+cache-test2: $(EXEC)
+	perf stat --repeat 10 \
+		-e cache-misses,cache-references,instructions,cycles \
+		./phonebook_opt
+
+cache-test3: $(EXEC)
 	perf stat --repeat 10 \
 		-e cache-misses,cache-references,instructions,cycles \
 		./phonebook_bst
