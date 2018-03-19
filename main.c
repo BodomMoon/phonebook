@@ -6,11 +6,14 @@
 
 #include IMPL
 #define MAX_TABLE_SIZE 4096
-#define DICT_FILE "./dictionary/words.txt"
+#define DICT_FILE "./dictionary/lastname3.txt"
 
 #if BST == 1
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 #define OUT_FILE "bst.txt"
-entry *hashTable[MAX_TABLE_SIZE] = {NULL};
+//entry *hashTable[MAX_TABLE_SIZE] = {NULL};
 entry *tableHead[MAX_TABLE_SIZE] = {NULL};
 #elif OPT == 1
 #define OUT_FILE "opt.txt"
@@ -73,9 +76,9 @@ int main(int argc, char *argv[])
     printf("size of entry : %lu bytes\n", sizeof(entry));
     do {
 #if BST ==1
-        hashTable[counter] = (entry*) malloc(sizeof(entry));
-        tableHead[counter ] = hashTable[counter ];
-        *hashTable[(counter++)] -> lastName = 0;
+        tableHead[counter] = (entry*) malloc(sizeof(entry));
+        //tableHead[counter ] = hashTable[counter ];
+        *tableHead[(counter++)] -> lastName = 0;
 #else
         hashTable[(counter++)] = (entry*) malloc(sizeof(entry));
         tableHead[counter -1 ] = hashTable[counter - 1];
@@ -107,6 +110,8 @@ int main(int argc, char *argv[])
         hashTable[hashValue] = append(line, hashTable[hashValue]);
 #else
         append(line, tableHead[hashValue]);
+        
+
 #endif
 #else       //compilering orgin version  
         e = append(line, e);
@@ -121,7 +126,7 @@ int main(int argc, char *argv[])
 
 
 #if OPT == 1 && ENT!=1//compilering OPT version
-    char input[MAX_LAST_NAME_SIZE] = "zyxel";
+    char input[MAX_LAST_NAME_SIZE] = "ear";
     e = tableHead[BKDRhash(input)];
 #elif ENT == 1 //editable version
     puts("enter the words you want to search");
@@ -131,15 +136,13 @@ int main(int argc, char *argv[])
     input[strlen(input)-1] = '\0';
     e = tableHead[BKDRhash(input)];
 #else
-    char input[MAX_LAST_NAME_SIZE] = "zyxel";
+    char input[MAX_LAST_NAME_SIZE] = "ear";
     e = pHead;
 #endif
 
     assert(findName(input, e) &&
            "Did you implement findName() in " IMPL "?");
     assert(0 == strcmp(findName(input, e)->lastName, input));
-
-
 
 #if defined(__GNUC__)
     __builtin___clear_cache((char *) pHead, (char *) pHead + sizeof(entry));
@@ -148,8 +151,10 @@ int main(int argc, char *argv[])
     clock_gettime(CLOCK_REALTIME, &start);
     //printf("%s",findName(input, e)->lastName );
     findName(input, e);
+
     clock_gettime(CLOCK_REALTIME, &end);
     cpu_time2 = diff_in_second(start, end);
+
 
     FILE *output = fopen(OUT_FILE, "a");
     fprintf(output, "append() findName() %lf %lf\n", cpu_time1, cpu_time2);
@@ -161,12 +166,15 @@ int main(int argc, char *argv[])
 
 #if BST == 1 && OPT== 1//compilering OPT version
     counter = 0;
+    
     do {
         free(tableHead[counter] -> pLeft);
         free(tableHead[counter] -> pRight);
         free(tableHead[(counter++)] );
 
     } while (counter < MAX_TABLE_SIZE);
+    
+    //printf("avg = %d max = %d min = %d",all/MAX_TABLE_SIZE,max,min );
 #elif OPT == 1 && BST != 1
     counter = 0;
     do {
@@ -183,4 +191,5 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
 
