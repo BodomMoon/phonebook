@@ -39,11 +39,11 @@ entry *findName(char lastName[], entry *pHead)
         return NULL;
 }
 
-entry *append(char lastName[], entry *e)
+void append(char lastName[], entry *e)
 {
     /* allocate memory for the new entry and put lastName */
     entry *pre;
-    int a = 0;
+    int a = 0 ;
     while(e!=NULL) {
         if(strcasecmp(e->lastName, lastName) < 0 ) {
             pre = e;
@@ -65,7 +65,7 @@ entry *append(char lastName[], entry *e)
     strcpy(pre->lastName, lastName);
     pre->pLeft = NULL;
     pre->pRight = NULL;
-    return pre;
+    return 0;
 
     /*   this is my old dirty code
     while(1)
