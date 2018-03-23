@@ -31,12 +31,10 @@ entry *findName(char lastName[], entry *pHead)
             pHead = pHead -> pLeft;
         else
             pHead = pHead -> pRight;
-    } while (pHead != NULL && (result = strcasecmp(lastName, pHead->lastName)) != 0);
+    } while ( (pHead) && (result = strcasecmp(lastName, pHead->lastName)) != 0);
 
-    if (pHead !=NULL)
-        return (pHead);
-    else
-        return NULL;
+    return (pHead);
+
 }
 
 void append(char lastName[], entry *e)
@@ -44,28 +42,28 @@ void append(char lastName[], entry *e)
     /* allocate memory for the new entry and put lastName */
     entry *pre;
     int a = 0 ;
-    while(e!=NULL) {
+    while(e) {
+        pre = e;
         if(strcasecmp(e->lastName, lastName) < 0 ) {
-            pre = e;
             e = e->pRight;
             a = 0;
         } else {
-            pre = e;
             e = e->pLeft;
             a = 1;
         }
     }
-    if(a == 0 ) {
+    if(!a) {
         pre->pRight = (entry *) malloc(sizeof(entry));
         pre = pre->pRight;
     } else {
         pre->pLeft = (entry *) malloc(sizeof(entry));
         pre = pre->pLeft;
     }
+    //e = (entry *) malloc(sizeof(entry));
     strcpy(pre->lastName, lastName);
     pre->pLeft = NULL;
     pre->pRight = NULL;
-    return 0;
+    return ;
 
     /*   this is my old dirty code
     while(1)
