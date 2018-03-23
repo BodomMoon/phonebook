@@ -3,10 +3,16 @@
 #include <string.h>
 #include <time.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include IMPL
 #define MAX_TABLE_SIZE 4096
+
+#if HUF==1
+#define DICT_FILE "./dictionary/lastName_DEC.txt"
+#else
 #define DICT_FILE "./dictionary/lastname3.txt"
+#endif
 
 #if BST == 1
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -37,7 +43,15 @@ static double diff_in_second(struct timespec t1, struct timespec t2)
     }
     return (diff.tv_sec + diff.tv_nsec / 1000000000.0);
 }
-
+#if HUF ==1
+unsigned int hash(unsigned long int x) 
+{ 
+    x = ((x >> 32) ^ x) * 0x45d9f3b; 
+    x = ((x >> 32) ^ x) * 0x45d9f3b; 
+    x = ((x >> 32) ^ x); 
+    return (unsigned int) (x & (MAX_TABLE_SIZE -1)); 
+}
+#else
 unsigned int BKDRhash(char *cPtr)
 {
     unsigned int hash = 0;
@@ -49,6 +63,8 @@ unsigned int BKDRhash(char *cPtr)
 
     /* *cPtr | 0 = *cPtr != '\0' gcc will compile then to the same thing */
 }
+#endif
+
 
 int main(int argc, char *argv[])
 {
@@ -57,7 +73,9 @@ int main(int argc, char *argv[])
     char line[MAX_LAST_NAME_SIZE];
     struct timespec start, end;
     double cpu_time1, cpu_time2;
-
+#if HUF ==1
+    unsigned long int inputL;
+#endif
     /* check file opening */
     fp = fopen(DICT_FILE, "r");
     if (fp != NULL) {
@@ -78,7 +96,11 @@ int main(int argc, char *argv[])
 #if BST ==1
         tableHead[counter] = (entry*) malloc(sizeof(entry));
         //tableHead[counter ] = hashTable[counter ];
+#if HUF ==1
+        tableHead[(counter++)] -> lastName = 0;
+#else   
         *tableHead[(counter++)] -> lastName = 0;
+#endif     
 #else
         hashTable[(counter++)] = (entry*) malloc(sizeof(entry));
         tableHead[counter -1 ] = hashTable[counter - 1];
@@ -99,24 +121,46 @@ int main(int argc, char *argv[])
 #if ENT==1 //editable version
     puts("enter the words you want to append");
     fgets(line, sizeof(line), stdin);
+#elif HUF==1
+    extra *hHead = (extra *) malloc(sizeof(extra));
+    hHead->pNext = NULL;
+    //loadCode();
+    int statu = fscanf(fp,"%lu",&inputL);
 #else
     fgets(line, sizeof(line), fp);
 #endif
+#if HUF!=1
     do {
         line[strlen(line) -1] = '\0'; //change while loop to strlen
-#if OPT == 1 //compilering OPT version
+#if OPT == 1  //compilering OPT version
         unsigned int hashValue = BKDRhash(line);
 #if BST != 1
         hashTable[hashValue] = append(line, hashTable[hashValue]);
 #else
-        append(line, tableHead[hashValue]);
-        
-
+            append(line, tableHead[hashValue]);
 #endif
 #else       //compilering orgin version  
-        e = append(line, e);
+
+            e = append(line, e);   
 #endif
     } while (fgets(line, sizeof(line), fp));
+#else
+    //int c=0;
+    do{
+        if(statu){
+            append(inputL,tableHead[hash(inputL)]);
+
+            //printf("hash = %u\n", hash(inputL));
+            //printf("%lu\n", inputL);
+        }
+        else{
+            statu = fscanf(fp,"%s",line);
+            line[strlen(line)-1] = '\0';
+            appendExtra(line,hHead);
+        }
+        //printf("%d\n",(c++) );
+    } while((statu = fscanf(fp,"%lu",&inputL))!= EOF);
+#endif
     /* close file as soon as possible */
     fclose(fp);
     clock_gettime(CLOCK_REALTIME, &end);
@@ -125,7 +169,7 @@ int main(int argc, char *argv[])
     /* the givn last name to find */
 
 
-#if OPT == 1 && ENT!=1//compilering OPT version
+#if OPT == 1 && ENT!=1 && HUF!=1//compilering OPT version
     char input[MAX_LAST_NAME_SIZE] = "ear";
     e = tableHead[BKDRhash(input)];
 #elif ENT == 1 //editable version
@@ -135,14 +179,34 @@ int main(int argc, char *argv[])
     fgets(input, MAX_LAST_NAME_SIZE, stdin);
     input[strlen(input)-1] = '\0';
     e = tableHead[BKDRhash(input)];
+#elif HUF ==1
+    char inputC[MAX_LAST_NAME_SIZE] = "ear";
+    unsigned long int input = encode(inputC); 
+    /*printf("input = %lu\n", input);
+    for(int i = 0;i<64;i++)
+    {
+        printf("%lu",(input >> 63));
+        input<<=1;
+    }
+    //printf("\n");
+    printf("hash = %u\n", hash(inputL));*/
+    e = tableHead[hash(input)];
 #else
     char input[MAX_LAST_NAME_SIZE] = "ear";
     e = pHead;
 #endif
 
+#if HUF==1
+    assert(findName(input, e) &&
+           "Did you implement findName() in " IMPL "?");
+    assert((findName(input, e)->lastName == input));
+#else
     assert(findName(input, e) &&
            "Did you implement findName() in " IMPL "?");
     assert(0 == strcmp(findName(input, e)->lastName, input));
+#endif
+
+
 
 #if defined(__GNUC__)
     __builtin___clear_cache((char *) pHead, (char *) pHead + sizeof(entry));
