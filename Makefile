@@ -4,7 +4,7 @@ CFLAGS_orig = -O0
 CFLAGS_opt  = -O0
 CFLAGS_bst  = -O0
 
-EXEC = phonebook_orig phonebook_opt phonebook_bst phonebook_ent
+EXEC = phonebook_orig phonebook_opt phonebook_bst phonebook_ent phonebook_huf
 
 GIT_HOOKS := .git/hooks/applied
 .PHONY: all
@@ -33,6 +33,12 @@ phonebook_ent: $(SRCS_common) phonebook_opt.c phonebook_opt.h
 		-DIMPL="\"phonebook_opt.h\"" -o $@ \
 		-D ENT=1 $(SRCS_common) phonebook_opt.c
 
+phonebook_huf: $(SRCS_common) phonebook_huf.c phonebook_huf.h
+	$(CC) $(CFLAGS_common) $(CFLAGS_bst) \
+		-g -DIMPL="\"$@.h\"" -o $@ -g \
+		$(SRCS_common) -g $@.c
+
+
 
 run: $(EXEC)
 	echo 3 | sudo tee /proc/sys/vm/drop_caches
@@ -43,6 +49,10 @@ run2: $(EXEC)
 run3: $(EXEC)
 	echo 3 | sudo tee /proc/sys/vm/drop_caches
 	watch -d -t "./phonebook_bst && echo 3 | sudo tee /proc/sys/vm/drop_caches"
+run4: $(EXEC)
+	echo 3 | sudo tee /proc/sys/vm/drop_caches
+	watch -d -t "./phonebook_huf && echo 3 | sudo tee /proc/sys/vm/drop_caches"
+
 
 
 cache-test: $(EXEC)
@@ -55,6 +65,9 @@ cache-test: $(EXEC)
 	perf stat --repeat 10 \
 		-e cache-misses,cache-references,instructions,cycles \
 		./phonebook_bst
+	perf stat --repeat 20 \
+		-e cache-misses,cache-references,instructions,cycles \
+		./phonebook_huf
 			
 cache-test2: $(EXEC)
 	perf stat --repeat 10 \
@@ -65,6 +78,10 @@ cache-test3: $(EXEC)
 	perf stat --repeat 10 \
 		-e cache-misses,cache-references,instructions,cycles \
 		./phonebook_bst
+cache-test4: $(EXEC)
+	perf stat --repeat 20 \
+		-e cache-misses,cache-references,instructions,cycles \
+		./phonebook_huf
 
 output.txt: cache-test calculate
 	./calculate
