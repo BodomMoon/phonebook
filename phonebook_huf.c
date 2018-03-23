@@ -8,6 +8,7 @@
 #include "phonebook_huf.h"
 
 int loadCode(){
+    //TODO fix this
     FILE *encode = fopen(ENCODE_FILE, "r");
     char input[MAX_CODE_LENTH + 1];
     int codeNumber = 0;
