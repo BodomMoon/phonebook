@@ -10,6 +10,7 @@
 
 #if HUF==1
 #define DICT_FILE "./dictionary/lastName_DEC.txt"
+#define OUT_FILE "huf.txt"
 #else
 #define DICT_FILE "./dictionary/lastname3.txt"
 #endif
