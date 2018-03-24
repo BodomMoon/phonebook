@@ -10,7 +10,6 @@
 
 #if HUF==1
 #define DICT_FILE "./dictionary/lastName_DEC.txt"
-#define OUT_FILE "huf.txt"
 #else
 #define DICT_FILE "./dictionary/lastname3.txt"
 #endif
@@ -18,8 +17,11 @@
 #if BST == 1
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
-
+#if HUF!=1
 #define OUT_FILE "bst.txt"
+#else
+#define OUT_FILE "huf.txt"
+#endif
 //entry *hashTable[MAX_TABLE_SIZE] = {NULL};
 entry *tableHead[MAX_TABLE_SIZE] = {NULL};
 #elif OPT == 1
@@ -183,8 +185,8 @@ int main(int argc, char *argv[])
 #elif HUF ==1
     char inputC[MAX_LAST_NAME_SIZE] = "ear";
     unsigned long int input = encode(inputC); 
-    /*printf("input = %lu\n", input);
-    for(int i = 0;i<64;i++)
+    //printf("input = %lu\n", input);
+    /*for(int i = 0;i<64;i++)
     {
         printf("%lu",(input >> 63));
         input<<=1;
