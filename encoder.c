@@ -4,11 +4,13 @@
 #include <time.h>
 #include <assert.h>
 
-#define DICT_FILE "lastname.txt"
+#define DICT_FILE "lastname3.txt"
+#define OUT_FILE "lastName_DEC.txt"
 
 #define MAX_TABLE_SIZE 4096
 #define MAX_LAST_NAME_SIZE 20
 #define SET_LAST_NAME_SIZE 8
+#define BIT_OF_LONG 64
 
 
 typedef struct __PHONE_BOOK_DETAIL_ENTRY {
@@ -35,9 +37,9 @@ int main()
     FILE *fp;
     char line[MAX_LAST_NAME_SIZE];
     int max = 0;
-    int codeLen[27]={3,6, 5,6,4, 7,6,5,4, 8,5, 4, 5,4, 4, 6,  9,4, 4,5, 5, 6,7,  9, 6,7,3};
-    int code[27]   ={7,3,12,0,1,32,2,9,3,66,5,13,23,7,10,17,134,5,12,4,13,45,3,135,44,2,4};
-
+    int codeLen[27]=    {3,6, 5,6,4, 7,6,5,4, 8,5, 4, 5,4, 4, 6,  9,4, 4,5, 5, 6,7,  9, 6,7,3};
+    long int code[27]  ={7,3,12,0,1,32,2,9,3,66,5,13,23,7,10,17,134,5,12,4,13,45,3,135,44,2,4};
+//                       a b  c d e  f g h i  j k  l  m n  o  p   q r  s t  u  v w   x  y z a
     fp = fopen(DICT_FILE, "r");
     if (fp != NULL) {
         /*
@@ -50,31 +52,36 @@ int main()
     int avg=0;
     int boom = 0;
 
+    FILE *output = fopen(OUT_FILE, "a");
     while(fgets(line, sizeof(line), fp)!=NULL){
-        int all = 0;
-        for(int i = 0; i < strlen(line); i++){
+        int move = BIT_OF_LONG;
+        unsigned long int out = 0;
+        int flag = 0;
+        for(int i = 0 ; i < strlen(line)-1; i++){
             int test = 0;
             test = line[i]-'a';
-            all+=codeLen[test];
-        
+            move -= codeLen[test];
+            if(move >= 3){
+                out |= (code[test] << move);
+                //printf("move = %d char = %c code = %ld out = %ld \n", move ,line[i],(code[test] << move),out);
+            }
+            else{
+                flag = 1;
+                line[strlen(line)-1] = '\0';
+                //puts("boom");
+                break;
+            }
         }
-        all+=3;
-        /*if(all<10)
-        {
-            line[strlen(line)-1] = '\0';
-            puts(line);
-        }*/
-        avg+=all;
-        if(all>64)
-        {
-            boom++;
-        }
-        if(all > max)
-        {
-            printf("all = %d\n",all);
-            max = all;
+
+        if(flag == 0){
+            move -= codeLen[26];
+            out |= (code[26] << move);
+            fprintf(output,"%lu\n",out);
+        }else{
+            fprintf(output, "%s\n", line);
         }
     }
-    printf("max = %d avg = %d boom = %d \n", max,avg/896410,boom);
-    printf("%ld\n", sizeof(entry));
+
+    fclose(output);
 }
+
