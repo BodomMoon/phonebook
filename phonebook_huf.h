@@ -28,7 +28,7 @@ typedef struct __PHONE_BOOK_ENTRY {
     unsigned long int lastName;
     struct __PHONE_BOOK_ENTRY *pLeft;
     struct __PHONE_BOOK_ENTRY *pRight;
-    //detail *pDetail;
+    detail *pDetail;
 } entry;
 
 typedef struct __PHONE_BOOK_EXTRA {
